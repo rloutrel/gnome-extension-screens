@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
   <schema id="org.gnome.shell.extensions.screens"
-          path="/org.gnome.shell.extensions.screens/">
-    <key name="sample-boolean" type="b">
-      <default>false</default>
-      <summary>Sample boolean setting</summary>
-      <description>Example boolean setting demonstrated in the preferences window</description>
+          path="/org/gnome/shell/extensions/screens/">
+    <key name="show-resolution" type="b">
+      <default>true</default>
+      <summary>Show screen resolutions</summary>
+      <description>Show each screen's resolution and position in the top-bar menu</description>
     </key>
   </schema>
 </schemalist>

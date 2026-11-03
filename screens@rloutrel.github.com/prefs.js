@@ -16,22 +16,22 @@ export default class ScreensPreferences extends ExtensionPreferences {
         window.add(page);
 
         const group = new Adw.PreferencesGroup({
-            title: _('Sample'),
-            description: _('Example settings group'),
+            title: _('Menu'),
+            description: _('Top-bar menu display options'),
         });
         page.add(group);
 
-        const sampleRow = new Adw.ActionRow({
-            title: _('Sample boolean setting'),
+        const resolutionRow = new Adw.ActionRow({
+            title: _('Show screen resolutions'),
         });
-        group.add(sampleRow);
+        group.add(resolutionRow);
 
-        const sampleSwitch = new Gtk.Switch({
+        const resolutionSwitch = new Gtk.Switch({
             valign: Gtk.Align.CENTER,
         });
-        sampleRow.add_suffix(sampleSwitch);
+        resolutionRow.add_suffix(resolutionSwitch);
 
-        settings.bind('sample-boolean', sampleSwitch, 'active',
+        settings.bind('show-resolution', resolutionSwitch, 'active',
             Gio.SettingsBindFlags.DEFAULT);
 
         const creditsGroup = new Adw.PreferencesGroup({

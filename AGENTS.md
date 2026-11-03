@@ -26,7 +26,7 @@ screens@rloutrel.github.com/
   indicator.js       # Panel indicator: menu construction, polling.
   logger.js          # Unified debug/warn/error + notification helpers.
   prefs.js           # Preferences window (GTK4/Adwaita process).
-  sampleModule.js    # PURE: example Node-testable module.
+  screens.js         # PURE: screen descriptors + label formatting (Node-tested).
   stylesheet.css     # Theme-aware styles (no hardcoded colors).
   metadata.json      # Shell version, UUID, version.
   schemas/           # GSettings schema.
@@ -34,7 +34,7 @@ screens@rloutrel.github.com/
 
 ### Pure vs GJS modules
 
-A hard rule: **`sampleModule.js` (and any module you add like it) is a pure
+A hard rule: **`screens.js` (and any pure module you add like it) is a pure
 module with zero GJS/GObject imports.** Pure modules run under plain Node and
 are unit-tested there. Do **not** add `gi://` or `resource:///` imports to
 them. Anything that touches `Gio`, `GLib`, `St`, `Clutter`, `Main`, or
