@@ -1,7 +1,7 @@
 {
     "name": "Template",
     "description": "A GNOME Shell extension template with modern GJS practices, tests, CI pipeline and a project setup script",
-    "shell-version": ["50"],
+    "shell-version": ["50", "51"],
     "uuid": "template@rloutrel.github.com",
     "developer": "Romain Loutrel",
     "url": "https://github.com/rloutrel/gnome-extension-template",
