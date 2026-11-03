@@ -3,13 +3,15 @@
 // GJS widgets and keeps the enable()/disable() lifecycle clean.
 import St from 'gi://St';
 import GLib from 'gi://GLib';
+import GObject from 'gi://GObject';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 import {_debug} from './logger.js';
 import {greet} from './sampleModule.js';
 
-export class Indicator extends PanelMenu.Button {
+export const Indicator = GObject.registerClass(
+class Indicator extends PanelMenu.Button {
     constructor({extensionPath, openPreferences}) {
         super(0.0, _('Screens'));
         this._extensionPath = extensionPath;
@@ -60,4 +62,4 @@ export class Indicator extends PanelMenu.Button {
         this._stopPolling();
         super.destroy();
     }
-}
+});
