@@ -6,10 +6,13 @@ top bar. It targets **GNOME Shell 50/51** (ESM imports
 
 ## What's in the box
 
+- **Screen arrangements** — the menu lists connected screens (from
+  `global.display`) and lets you save the current arrangement under a name
+  (stored in the `saved-arrangements` GSettings key); saved arrangements can
+  be listed and deleted from the menu.
 - **GNOME Shell 50/51 skeleton** — ESM imports, `extension.js` lifecycle
-  only, `indicator.js` (PanelMenu listing connected screens from
-  `global.display`), `prefs.js` (GTK4/Adwaita), GSettings schema,
-  theme-aware `stylesheet.css`, `logger.js`.
+  only, `indicator.js` (PanelMenu), `prefs.js` (GTK4/Adwaita), GSettings
+  schema, theme-aware `stylesheet.css`, `logger.js`.
 - **Pure vs GJS module architecture** — domain logic lives in pure modules
   with zero GJS imports, unit-tested under plain Node (see `AGENTS.md`).
 - **No build step** — no bundler, no transpiler; source files are shipped
@@ -81,6 +84,8 @@ screens@rloutrel.github.com/
   logger.js          # Unified debug/warn/error + notification helpers
   prefs.js           # Preferences window (separate GTK4/Adwaita process)
   screens.js         # PURE: screen descriptors + label formatting (Node-tested)
+  arrangements.js    # PURE: named screen arrangements, JSON validation (Node-tested)
+  arrangementDialog.js # Modal dialog to name and save the current arrangement
   stylesheet.css     # Theme-aware styles (no hardcoded colors)
   metadata.json      # Shell version, UUID, version
   schemas/           # GSettings schema

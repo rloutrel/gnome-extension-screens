@@ -10,6 +10,8 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 import {_debug} from './logger.js';
 import {toScreenDescriptors, formatScreenLabel} from './screens.js';
+import {parseArrangements, saveArrangement, removeArrangement, serializeArrangements} from './arrangements.js';
+import {openSaveArrangementDialog} from './arrangementDialog.js';
 
 export const Indicator = GObject.registerClass(
 class Indicator extends PanelMenu.Button {
@@ -25,7 +27,7 @@ class Indicator extends PanelMenu.Button {
     setup() {
         this._addIcon();
         this._buildMenu();
-        this._settingsChangedId = this._settings.connect('changed::show-resolution',
+        this._settingsChangedId = this._settings.connect('changed',
             () => this._buildMenu());
         this._startPolling();
     }
@@ -55,6 +57,11 @@ class Indicator extends PanelMenu.Button {
                 formatScreenLabel(screen, showResolution, _)));
         }
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        this._buildSavedArrangements();
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        this.menu.addAction(_('Save current arrangement…'), () => {
+            openSaveArrangementDialog(name => this._saveCurrentArrangement(name));
+        });
         this.menu.addAction(_('Display Settings…'), () => {
             Gio.Subprocess.new(['gnome-control-center', 'display'],
                 Gio.SubprocessFlags.NONE);
@@ -62,6 +69,30 @@ class Indicator extends PanelMenu.Button {
         const prefsItem = this.menu.addAction(_('Preferences'),
             () => this._openPreferences());
         prefsItem.label.add_style_class_name('screens-menu-label');
+    }
+
+    _savedArrangements() {
+        return parseArrangements(this._settings.get_string('saved-arrangements'));
+    }
+
+    _buildSavedArrangements() {
+        for (const arrangement of this._savedArrangements()) {
+            const item = new PopupMenu.PopupSubMenuMenuItem(arrangement.name);
+            item.menu.addAction(_('Delete'), () => {
+                const next = removeArrangement(this._savedArrangements(), arrangement.name);
+                this._settings.set_string('saved-arrangements', serializeArrangements(next));
+            });
+            this.menu.addMenuItem(item);
+        }
+    }
+
+    _saveCurrentArrangement(name) {
+        try {
+            const next = saveArrangement(this._savedArrangements(), name, this._collectScreens());
+            this._settings.set_string('saved-arrangements', serializeArrangements(next));
+        } catch (error) {
+            _debug(`failed to save arrangement: ${error.message}`);
+        }
     }
 
     _startPolling() {

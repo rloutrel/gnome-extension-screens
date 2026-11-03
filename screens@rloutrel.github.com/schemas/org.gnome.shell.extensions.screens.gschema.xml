@@ -7,5 +7,10 @@
       <summary>Show screen resolutions</summary>
       <description>Show each screen's resolution and position in the top-bar menu</description>
     </key>
+    <key name="saved-arrangements" type="s">
+      <default>'[]'</default>
+      <summary>Saved screen arrangements</summary>
+      <description>JSON list of named screen arrangements saved on demand from the menu</description>
+    </key>
   </schema>
 </schemalist>

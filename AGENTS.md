@@ -27,6 +27,8 @@ screens@rloutrel.github.com/
   logger.js          # Unified debug/warn/error + notification helpers.
   prefs.js           # Preferences window (GTK4/Adwaita process).
   screens.js         # PURE: screen descriptors + label formatting (Node-tested).
+  arrangements.js    # PURE: named screen arrangements, JSON validation (Node-tested).
+  arrangementDialog.js # Modal dialog asking for a name when saving an arrangement.
   stylesheet.css     # Theme-aware styles (no hardcoded colors).
   metadata.json      # Shell version, UUID, version.
   schemas/           # GSettings schema.
