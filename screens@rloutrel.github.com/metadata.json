@@ -1,0 +1,13 @@
+{
+    "name": "Screens",
+    "description": "Monitor and control screens (displays) from the GNOME Shell top bar",
+    "shell-version": [
+        "50",
+        "51"
+    ],
+    "uuid": "screens@rloutrel.github.com",
+    "developer": "Romain Loutrel",
+    "url": "https://github.com/rloutrel/gnome-extension-screens",
+    "gettext-domain": "screens@rloutrel.github.com",
+    "settings-schema": "org.gnome.shell.extensions.screens"
+}

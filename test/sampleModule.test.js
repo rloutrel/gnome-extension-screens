@@ -9,7 +9,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { greet } from '../template@rloutrel.github.com/sampleModule.js';
+import { greet } from '../screens@rloutrel.github.com/sampleModule.js';
 
 test('greet: returns a greeting for a name', () => {
     assert.equal(greet('GNOME'), 'Hello, GNOME!');

@@ -1,17 +1,18 @@
-# GNOME Shell Extension Template
+# Screens
 
-A modern template for GNOME Shell extensions, based on the structure and
-practices of [gnome-extension-nvme-monitor](https://github.com/rloutrel/gnome-extension-nvme-monitor).
-It targets the latest GNOME Shell GJS specifics and ships a full pipeline.
+A GNOME Shell extension to monitor and control screens (displays) from the
+top bar. It targets **GNOME Shell 50/51** (ESM imports
+`resource:///org/gnome/shell/...`).
 
 ## What's in the box
 
-- **GNOME Shell 50/51 skeleton** — ESM imports (`resource:///org/gnome/shell/...`),
-  `extension.js` lifecycle only, `indicator.js` (PanelMenu), `prefs.js`
-  (GTK4/Adwaita), GSettings schema, theme-aware `stylesheet.css`, `logger.js`.
+- **GNOME Shell 50/51 skeleton** — ESM imports, `extension.js` lifecycle
+  only, `indicator.js` (PanelMenu), `prefs.js` (GTK4/Adwaita), GSettings
+  schema, theme-aware `stylesheet.css`, `logger.js`.
 - **Pure vs GJS module architecture** — domain logic lives in pure modules
   with zero GJS imports, unit-tested under plain Node (see `AGENTS.md`).
-- **No build step** — no bundler, no transpiler; source files are shipped as-is.
+- **No build step** — no bundler, no transpiler; source files are shipped
+  as-is.
 - **Test pipeline** — Node built-in test runner (no framework, no runtime
   dependencies), ESLint 9 flat config, `node --check` syntax checks,
   `metadata.json` validation, coverage (lcov).
@@ -26,32 +27,14 @@ It targets the latest GNOME Shell GJS specifics and ships a full pipeline.
 - **AI-agent tooling** — `AGENTS.md`, `.github/agents/`, `.github/skills/`
   (GJS/GTK4 practices, Shell 50/51 migration, knowledge cache, runtime
   validation) and a GJS runtime MCP server (`.github/mcp/`).
-- **`setup-project.sh`** — adapts this template to a new project in one
-  command (see below).
 
-## Getting started
-
-Adapt the template to your extension (renames the extension directory, UUID,
-GSettings schema, repository references, `metadata.json`, CI, SonarCloud):
-
-```bash
-./setup-project.sh <slug> "<Name>" "<Description>" [github-url] [developer]
-
-# Example
-./setup-project.sh nvme-monitor "NVMe Monitor" \
-    "Monitors NVMe device status in the top bar"
-```
-
-Then review `git diff`, adjust `README.md`, `extension.js` and the sample
-pure module to taste, and commit.
-
-### Installing (development / manual)
+## Installing (development / manual)
 
 1. Copy or symlink the extension folder into your GNOME Shell extensions
    directory:
 
    ```bash
-   cp -r template@rloutrel.github.com \
+   cp -r screens@rloutrel.github.com \
        ~/.local/share/gnome-shell/extensions/
    ```
 
@@ -60,21 +43,22 @@ pure module to taste, and commit.
 3. Enable the extension:
 
    ```bash
-   gnome-extensions enable template@rloutrel.github.com
+   gnome-extensions enable screens@rloutrel.github.com
    ```
 
-## Keeping derived projects in sync
+## Template sync
 
-Projects created from this template track absorbed changes with a
-`.template-sync.json` manifest and `template/v*` tags. See
+This project was derived from
+[`rloutrel/gnome-extension-template`](https://github.com/rloutrel/gnome-extension-template)
+and tracks absorbed upstream changes with a `.template-sync.json` manifest
+and `template/v*` tags. See
 [`TEMPLATE_SYNC.md`](TEMPLATE_SYNC.md) for the tag convention, the manifest
 format and both sync procedures (template → consumer and backport).
 
 ## Repository layout
 
 ```text
-setup-project.sh    # Adapts the template to a new project (rename + rewrite)
-template@rloutrel.github.com/
+screens@rloutrel.github.com/
   extension.js       # GNOME Shell entry point: enable/disable lifecycle only
   indicator.js       # Panel indicator: menu construction, polling
   logger.js          # Unified debug/warn/error + notification helpers

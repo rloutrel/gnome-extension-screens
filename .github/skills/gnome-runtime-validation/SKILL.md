@@ -25,7 +25,7 @@ mount the workspace and run from `/workspace`, for example:
 
 ```sh
 docker run --rm -i -v "$PWD:/workspace:ro" "$GJS_DOCKER_IMAGE" \
-  gjs --check /workspace/template@rloutrel.github.com/extension.js
+  gjs --check /workspace/screens@rloutrel.github.com/extension.js
 ```
 
 Use a GNOME Shell container or a real GNOME session for checks involving

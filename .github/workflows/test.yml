@@ -16,17 +16,17 @@ jobs:
       - name: Install ESLint
         run: npm ci --ignore-scripts
       - name: Lint
-        run: ./node_modules/.bin/eslint "template@rloutrel.github.com/" --ext .js
+        run: ./node_modules/.bin/eslint "screens@rloutrel.github.com/" --ext .js
       - name: Syntax check
         run: |
-          find "template@rloutrel.github.com" -name "*.js" -print0 | xargs -0 -n1 node --check
+          find "screens@rloutrel.github.com" -name "*.js" -print0 | xargs -0 -n1 node --check
           find "test" \( -name "*.js" -o -name "*.mjs" \) -print0 | xargs -0 -n1 node --check
       - name: Validate metadata
         run: node "test/validateMetadata.js"
       - name: Unit tests
         run: |
           node --test --experimental-test-coverage \
-            --test-coverage-include="template@rloutrel.github.com/**/*.js" \
+            --test-coverage-include="screens@rloutrel.github.com/**/*.js" \
             --test-coverage-exclude="**/test/**" \
             --test-reporter=spec --test-reporter-destination=stdout \
             --test-reporter=lcov --test-reporter-destination=lcov.info \

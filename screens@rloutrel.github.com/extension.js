@@ -8,7 +8,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import {_debug} from './logger.js';
 import {Indicator} from './indicator.js';
 
-export default class TemplateExtension extends Extension {
+export default class ScreensExtension extends Extension {
     constructor(metadata) {
         super(metadata);
         this.initTranslations();

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
-  <schema id="org.gnome.shell.extensions.template"
-          path="/org/gnome/shell/extensions/template/">
+  <schema id="org.gnome.shell.extensions.screens"
+          path="/org.gnome.shell.extensions.screens/">
     <key name="sample-boolean" type="b">
       <default>false</default>
       <summary>Sample boolean setting</summary>

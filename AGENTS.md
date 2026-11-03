@@ -5,11 +5,10 @@ repository. Read this before editing anything.
 
 ## Project
 
-Template for a GNOME Shell top-bar extension. Targets **GNOME Shell 50/51**
-(ESM imports `resource:///org/gnome/shell/...`).
+GNOME Shell top-bar extension to monitor and control screens (displays).
+Targets **GNOME Shell 50/51** (ESM imports `resource:///org/gnome/shell/...`).
 
-- UUID / extension dir: `template@rloutrel.github.com/` (adapt with
-  `./setup-project.sh` before starting real development)
+- UUID / extension dir: `screens@rloutrel.github.com/`
 - Language: JavaScript (ESM modules)
 - Runtime: GJS (SpiderMonkey) inside GNOME Shell
 - No build step, no bundler, no transpiler. Source files are shipped as-is.
@@ -17,11 +16,12 @@ Template for a GNOME Shell top-bar extension. Targets **GNOME Shell 50/51**
 ## Architecture
 
 ```text
-setup-project.sh     # Adapts the template to a new project (renames the
-                     #   extension dir, UUID, schema, references).
+setup-project.sh     # One-shot script used to derive this project from the
+                     #   gnome-extension-template (renames the extension dir,
+                     #   UUID, schema, references).
 test/                # Unit tests (Node built-in runner), repo root.
 po/                  # Translation sources (gettext), repo root.
-template@rloutrel.github.com/
+screens@rloutrel.github.com/
   extension.js       # GNOME Shell entry point: enable/disable lifecycle only.
   indicator.js       # Panel indicator: menu construction, polling.
   logger.js          # Unified debug/warn/error + notification helpers.
@@ -41,7 +41,7 @@ them. Anything that touches `Gio`, `GLib`, `St`, `Clutter`, `Main`, or
 GObject belongs in a GJS-only module (`extension.js`, `indicator.js`,
 `prefs.js`, `logger.js`), never in a pure module.
 
-Keep this split when the template grows: move domain logic (parsing,
+Keep this split as the project grows: move domain logic (parsing,
 formatting, state) into pure modules so it stays unit-testable.
 
 ### Lifecycle
@@ -81,7 +81,7 @@ node test/validateMetadata.js
 GJS-only modules are syntax-checked only:
 
 ```bash
-node --check template@rloutrel.github.com/extension.js
+node --check screens@rloutrel.github.com/extension.js
 ```
 
 CI (`.github/workflows/test.yml`) also runs ESLint with the flat config at

@@ -5,7 +5,7 @@
 //   console.error()  → programmer errors, failures (LEVEL_CRITICAL)
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-const LOG_PREFIX = '[Template]';
+const LOG_PREFIX = '[Screens]';
 
 export function _debug(message) {
     console.debug(`${LOG_PREFIX} ${message}`);

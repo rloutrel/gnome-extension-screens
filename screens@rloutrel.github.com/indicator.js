@@ -11,7 +11,7 @@ import {greet} from './sampleModule.js';
 
 export class Indicator extends PanelMenu.Button {
     constructor({extensionPath, openPreferences}) {
-        super(0.0, _('Template'));
+        super(0.0, _('Screens'));
         this._extensionPath = extensionPath;
         this._openPreferences = openPreferences;
         this._pollTimeoutId = null;
@@ -36,7 +36,7 @@ export class Indicator extends PanelMenu.Button {
         this.menu.addMenuItem(new PopupMenu.PopupMenuItem(greet('GNOME')));
         const prefsItem = this.menu.addAction(_('Preferences'),
             () => this._openPreferences());
-        prefsItem.label.add_style_class_name('template-menu-label');
+        prefsItem.label.add_style_class_name('screens-menu-label');
     }
 
     _startPolling() {

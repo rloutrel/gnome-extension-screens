@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { strict as assert } from 'node:assert';
 
-const METADATA_PATH = new URL('../template@rloutrel.github.com/metadata.json', import.meta.url);
+const METADATA_PATH = new URL('../screens@rloutrel.github.com/metadata.json', import.meta.url);
 const metadata = JSON.parse(readFileSync(METADATA_PATH, 'utf8'));
 
 assert.ok(typeof metadata.uuid === 'string' && metadata.uuid.length > 0,
