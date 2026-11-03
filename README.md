@@ -47,7 +47,9 @@ top bar. It targets **GNOME Shell 50/51** (ESM imports
    ```
 
 2. Compile the GSettings schema (required by the preferences process;
-   `gschemas.compiled` is gitignored, so this stays a local artifact):
+   `gschemas.compiled` is gitignored, so this stays a local artifact).
+   Re-run this after every schema change — a stale `gschemas.compiled`
+   shadows the XML and the extension fails with "GSettings key not found":
 
    ```bash
    glib-compile-schemas screens@rloutrel.github.com/schemas/
