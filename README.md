@@ -38,9 +38,23 @@ top bar. It targets **GNOME Shell 50/51** (ESM imports
        ~/.local/share/gnome-shell/extensions/
    ```
 
-2. Restart GNOME Shell (`Alt+F2` → `r` → `Enter` on X11, or log out and back
+   Or symlink it for development (edits are picked up on reload):
+
+   ```bash
+   ln -s "$PWD/screens@rloutrel.github.com" \
+       ~/.local/share/gnome-shell/extensions/screens@rloutrel.github.com
+   ```
+
+2. Compile the GSettings schema (required by the preferences process;
+   `gschemas.compiled` is gitignored, so this stays a local artifact):
+
+   ```bash
+   glib-compile-schemas screens@rloutrel.github.com/schemas/
+   ```
+
+3. Restart GNOME Shell (`Alt+F2` → `r` → `Enter` on X11, or log out and back
    in on Wayland).
-3. Enable the extension:
+4. Enable the extension:
 
    ```bash
    gnome-extensions enable screens@rloutrel.github.com
