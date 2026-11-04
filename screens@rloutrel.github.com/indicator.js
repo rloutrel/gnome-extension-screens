@@ -72,6 +72,8 @@ class Indicator extends PanelMenu.Button {
     }
 
     _savedArrangements() {
+        if (!this._settings.settings_schema.has_key('saved-arrangements'))
+            return [];
         return parseArrangements(this._settings.get_string('saved-arrangements'));
     }
 
