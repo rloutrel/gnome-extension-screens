@@ -62,7 +62,7 @@ export function saveArrangement(list, name, screens) {
     if (cleanName.length === 0)
         throw new Error('Arrangement name must not be empty');
     if (!screens.every(isValidScreen))
-        throw new Error('Invalid screen geometry');
+        throw new Error(`Invalid screen geometry: ${JSON.stringify(screens)}`);
     const entry = {
         name: cleanName,
         screens: screens.map(s => {

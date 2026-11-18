@@ -50,17 +50,25 @@ export async function collectCurrentScreens() {
         const monitor = monitors.find(m => m[0][0] === specArr[0]);
         const mode = monitor ? currentMode(monitor) : null;
         return {
-            x: lm[0],
-            y: lm[1],
-            scale: lm[2],
-            isPrimary: lm[4],
+            // Normalize: nested/devkit sessions can report odd values
+            // (e.g. a 0 refresh rate on virtual modes).
+            x: Math.round(lm[0]),
+            y: Math.round(lm[1]),
+            scale: lm[2] > 0 ? lm[2] : 1,
+            isPrimary: lm[4] === true,
             spec: {
-                connector: specArr[0],
-                vendor: specArr[1],
-                product: specArr[2],
-                serial: specArr[3],
+                connector: String(specArr[0]),
+                vendor: String(specArr[1]),
+                product: String(specArr[2]),
+                serial: String(specArr[3]),
             },
-            mode: mode ? {width: mode[1], height: mode[2], rate: mode[3]} : undefined,
+            mode: mode
+                ? {
+                    width: Math.round(mode[1]),
+                    height: Math.round(mode[2]),
+                    rate: mode[3] > 0 ? mode[3] : 60,
+                }
+                : undefined,
         };
     });
 }
