@@ -96,22 +96,26 @@ export async function applyArrangement(arrangement) {
     if (!entries.some(e => e.screen.isPrimary === true))
         entries[0] = {...entries[0], screen: {...entries[0].screen, isPrimary: true}};
 
-    // GJS will not coerce nested JS arrays into D-Bus structs ("not a
-    // subclass of GObject.Struct, it's a Array"), so build the structs
-    // bottom-up as explicit GLib.Variant objects:
+    // GJS cannot reliably coerce nested JS arrays into D-Bus structs ("not
+    // a subclass of GObject_Struct"), so build the parameters with
+    // GLib.Variant.parse() from the GVariant text format instead — the same
+    // format gdbus accepts:
     // logical monitor = (i x, i y, d scale, u transform, b primary,
     //                     a(ssa{sv}) monitors)
     // monitor entry   = (s connector, s mode_id, a{sv} properties)
-    const logicalVariants = entries.map(({screen, connector, modeId}) => {
-        const monitorEntry = new GLib.Variant('(ssa{sv})',
-            [connector, modeId, new GLib.Variant('a{sv}', {})]);
-        return new GLib.Variant('(iiduba(ssa{sv}))',
-            [screen.x, screen.y, screen.scale ?? 1.0, 0, screen.isPrimary === true,
-                [monitorEntry]]);
-    });
-    const params = new GLib.Variant('(uua(iiduba(ssa{sv}))a{sv})',
-        [serial, 1, logicalVariants, new GLib.Variant('a{sv}', {})]);
+    const logicalMonitorsText = `[${entries.map(({screen, connector, modeId}) =>
+        `(${screen.x}, ${screen.y}, ${screen.scale ?? 1.0}, 0, ${screen.isPrimary === true}, ` +
+        `[(${quote(connector)}, ${quote(modeId)}, {})])`).join(', ')}]`;
+    const text = `(${serial}, 1, ${logicalMonitorsText}, {})`;
+    const params = GLib.Variant.parse(
+        GLib.VariantType.new('(uua(iiduba(ssa{sv}))a{sv})'), text);
+    if (params === null)
+        throw new Error(`failed to build ApplyMonitorsConfig parameters: ${text}`);
     await call('ApplyMonitorsConfig', params);
+}
+
+function quote(value) {
+    return `'${String(value).replaceAll('\\', '\\\\').replaceAll('\'', '\\\'')}'`;
 }
 
 // GDM reads its display configuration from the gdm user's monitors.xml.
