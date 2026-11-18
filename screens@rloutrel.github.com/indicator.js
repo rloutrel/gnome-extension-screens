@@ -29,7 +29,7 @@ class Indicator extends PanelMenu.Button {
         this._addIcon();
         this._buildMenu();
         this._settingsChangedId = this._settings.connect('changed',
-            () => this._buildMenu());
+            () => this._rebuildMenuIfClosed());
         this._startPolling();
     }
 
@@ -120,11 +120,18 @@ class Indicator extends PanelMenu.Button {
         }
     }
 
+    // Rebuilding destroys all menu items, which folds back an open menu;
+    // only rebuild while the menu is closed.
+    _rebuildMenuIfClosed() {
+        if (!this.menu.isOpen)
+            this._buildMenu();
+    }
+
     _startPolling() {
         this._stopPolling();
         this._pollTimeoutId = GLib.timeout_add_seconds(
             GLib.PRIORITY_DEFAULT, 5, () => {
-                this._buildMenu();
+                this._rebuildMenuIfClosed();
                 return GLib.SOURCE_CONTINUE;
             });
     }
