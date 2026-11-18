@@ -107,8 +107,10 @@ export async function applyArrangement(arrangement) {
         `(${screen.x}, ${screen.y}, ${screen.scale ?? 1.0}, 0, ${screen.isPrimary === true}, ` +
         `[(${quote(connector)}, ${quote(modeId)}, {})])`).join(', ')}]`;
     const text = `(${serial}, 1, ${logicalMonitorsText}, {})`;
+    // g_variant_parse(type, text, limit, end, ...): limit and end are
+    // nullable gchar pointers, not sizes — pass null for both.
     const params = GLib.Variant.parse(
-        GLib.VariantType.new('(uua(iiduba(ssa{sv}))a{sv})'), text, -1, null);
+        GLib.VariantType.new('(uua(iiduba(ssa{sv}))a{sv})'), text, null, null);
     if (params === null)
         throw new Error(`failed to build ApplyMonitorsConfig parameters: ${text}`);
     await call('ApplyMonitorsConfig', params);
