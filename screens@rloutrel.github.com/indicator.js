@@ -87,7 +87,7 @@ class Indicator extends PanelMenu.Button {
     _buildSavedArrangements() {
         for (const arrangement of this._savedArrangements()) {
             const item = new PopupMenu.PopupSubMenuMenuItem(arrangement.name);
-            item.menu.addAction(_('Set'), () => this._applyArrangement(arrangement));
+            item.menu.addAction(_('Apply'), () => this._applyArrangement(arrangement));
             item.menu.addAction(_('Update with current'), () => this._saveArrangementWithCurrent(arrangement.name));
             item.menu.addAction(_('Set for login screen'), () => this._setForLoginScreen(arrangement));
             item.menu.addAction(_('Delete'), () => {
