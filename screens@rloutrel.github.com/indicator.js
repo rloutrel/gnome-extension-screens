@@ -20,7 +20,7 @@ class Indicator extends PanelMenu.Button {
         this._extensionPath = extensionPath;
         this._openPreferences = openPreferences;
         this._settings = settings;
-        this._monitorsChangedId = null;
+        this._menuOpenChangedId = null;
         this._settingsChangedId = null;
     }
 
@@ -29,9 +29,14 @@ class Indicator extends PanelMenu.Button {
         this._buildMenu();
         this._settingsChangedId = this._settings.connect('changed',
             () => this._rebuildMenuIfClosed());
-        const monitorManager = global.backend.get_monitor_manager();
-        this._monitorsChangedId = monitorManager.connect('monitors-changed',
-            () => this._rebuildMenuIfClosed());
+        // Rebuild the content every time the menu is opened, so it always
+        // reflects the current screens; never while it is open (that would
+        // fold the menu back).
+        this._menuOpenChangedId = this.menu.connect('open-state-changed',
+            (_menu, isOpen) => {
+                if (isOpen)
+                    this._buildMenu();
+            });
     }
 
     _addIcon() {
@@ -130,9 +135,9 @@ class Indicator extends PanelMenu.Button {
 
     destroy() {
         _debug('indicator destroy()');
-        if (this._monitorsChangedId) {
-            global.backend.get_monitor_manager().disconnect(this._monitorsChangedId);
-            this._monitorsChangedId = null;
+        if (this._menuOpenChangedId) {
+            this.menu.disconnect(this._menuOpenChangedId);
+            this._menuOpenChangedId = null;
         }
         if (this._settingsChangedId) {
             this._settings.disconnect(this._settingsChangedId);
