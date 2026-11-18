@@ -3,6 +3,7 @@
 // Arrangement data logic lives in arrangements.js (pure); this file only
 // does D-Bus IO.
 import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
 
 const IFACE = 'org.gnome.Mutter.DisplayConfig';
 const PATH = '/org/gnome/Mutter/DisplayConfig';
@@ -94,7 +95,14 @@ export async function applyArrangement(arrangement) {
         throw new Error('none of the saved screens is currently connected');
     if (!logicalMonitors.some(lm => lm[4]))
         logicalMonitors[0][4] = true; // mutter requires exactly one primary
-    await call('ApplyMonitorsConfig', [serial, 1, logicalMonitors, {}]);
+    // Build the variant explicitly with the exact D-Bus signature: letting
+    // GJS guess the JS -> variant conversion for the nested structs fails
+    // with "not a subclass of GObject.Struct".
+    // Signature: (u serial, u method, a(iiduba(ssa{sv})) logical_monitors,
+    // a{sv} properties).
+    const params = new GLib.Variant('(uua(iiduba(ssa{sv}))a{sv})',
+        [serial, 1, logicalMonitors, {}]);
+    await call('ApplyMonitorsConfig', params);
 }
 
 // GDM reads its display configuration from the gdm user's monitors.xml.
