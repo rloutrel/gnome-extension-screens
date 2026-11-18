@@ -4,10 +4,22 @@
 // and serializes them. Never import gi:// or resource:/// here (see AGENTS.md).
 
 function isValidScreen(screen) {
-    return screen !== null && typeof screen === 'object' &&
-        Number.isInteger(screen.x) && Number.isInteger(screen.y) &&
-        Number.isInteger(screen.width) && screen.width > 0 &&
-        Number.isInteger(screen.height) && screen.height > 0;
+    if (screen === null || typeof screen !== 'object')
+        return false;
+    if (!Number.isInteger(screen.x) || !Number.isInteger(screen.y))
+        return false;
+    if (screen.width !== undefined &&
+        !(Number.isInteger(screen.width) && screen.width > 0))
+        return false;
+    if (screen.height !== undefined &&
+        !(Number.isInteger(screen.height) && screen.height > 0))
+        return false;
+    if (screen.scale !== undefined &&
+        !(typeof screen.scale === 'number' && screen.scale > 0))
+        return false;
+    if (screen.connector !== undefined && typeof screen.connector !== 'string')
+        return false;
+    return true;
 }
 
 function isValidArrangement(arrangement) {
@@ -36,13 +48,18 @@ export function saveArrangement(list, name, screens) {
         throw new Error('Invalid screen geometry');
     const entry = {
         name: cleanName,
-        screens: screens.map(s => ({
-            x: s.x,
-            y: s.y,
-            width: s.width,
-            height: s.height,
-            isPrimary: Boolean(s.isPrimary),
-        })),
+        screens: screens.map(s => {
+            const screen = {x: s.x, y: s.y, isPrimary: Boolean(s.isPrimary)};
+            if (typeof s.connector === 'string')
+                screen.connector = s.connector;
+            if (Number.isInteger(s.width))
+                screen.width = s.width;
+            if (Number.isInteger(s.height))
+                screen.height = s.height;
+            if (typeof s.scale === 'number' && s.scale > 0)
+                screen.scale = s.scale;
+            return screen;
+        }),
     };
     return [...list.filter(a => a.name !== cleanName), entry];
 }

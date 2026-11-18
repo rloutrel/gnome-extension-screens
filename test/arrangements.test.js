@@ -44,6 +44,15 @@ test('saveArrangement rejects empty names and invalid geometry', () => {
     assert.throws(() => saveArrangement([], 'Desk', [{x: 0, y: 0, width: 0, height: 1080}]));
 });
 
+test('saveArrangement keeps connector and scale for re-applying', () => {
+    const withConnector = {...SCREEN, connector: 'DP-1', scale: 2.0};
+    const list = saveArrangement([], 'Desk', [withConnector]);
+    assert.deepEqual(list[0].screens[0], {
+        x: 0, y: 0, isPrimary: true,
+        connector: 'DP-1', width: 1920, height: 1080, scale: 2.0,
+    });
+});
+
 test('removeArrangement deletes by name only', () => {
     let list = saveArrangement([], 'Desk', [SCREEN]);
     list = saveArrangement(list, 'External', [SCREEN]);

@@ -8,8 +8,9 @@ top bar. It targets **GNOME Shell 50/51** (ESM imports
 
 - **Screen arrangements** — the menu lists connected screens (from
   `global.display`) and lets you save the current arrangement under a name
-  (stored in the `saved-arrangements` GSettings key); saved arrangements can
-  be listed and deleted from the menu.
+  (stored in the `saved-arrangements` GSettings key); each saved arrangement
+  has a **Set** action (applies it via `org.gnome.Mutter.DisplayConfig`)
+  and a **Delete** action.
 - **GNOME Shell 50/51 skeleton** — ESM imports, `extension.js` lifecycle
   only, `indicator.js` (PanelMenu), `prefs.js` (GTK4/Adwaita), GSettings
   schema, theme-aware `stylesheet.css`, `logger.js`.
@@ -86,6 +87,7 @@ screens@rloutrel.github.com/
   screens.js         # PURE: screen descriptors + label formatting (Node-tested)
   arrangements.js    # PURE: named screen arrangements, JSON validation (Node-tested)
   arrangementDialog.js # Modal dialog to name and save the current arrangement
+  displayConfig.js   # D-Bus org.gnome.Mutter.DisplayConfig: read state, apply arrangement
   stylesheet.css     # Theme-aware styles (no hardcoded colors)
   metadata.json      # Shell version, UUID, version
   schemas/           # GSettings schema

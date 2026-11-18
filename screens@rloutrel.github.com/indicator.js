@@ -8,9 +8,10 @@ import GObject from 'gi://GObject';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
-import {_debug} from './logger.js';
+import {_debug, notifyError} from './logger.js';
 import {toScreenDescriptors, formatScreenLabel} from './screens.js';
 import {parseArrangements, saveArrangement, removeArrangement, serializeArrangements} from './arrangements.js';
+import {collectCurrentScreens, applyArrangement} from './displayConfig.js';
 import {openSaveArrangementDialog} from './arrangementDialog.js';
 
 export const Indicator = GObject.registerClass(
@@ -80,6 +81,7 @@ class Indicator extends PanelMenu.Button {
     _buildSavedArrangements() {
         for (const arrangement of this._savedArrangements()) {
             const item = new PopupMenu.PopupSubMenuMenuItem(arrangement.name);
+            item.menu.addAction(_('Set'), () => this._applyArrangement(arrangement));
             item.menu.addAction(_('Delete'), () => {
                 const next = removeArrangement(this._savedArrangements(), arrangement.name);
                 this._settings.set_string('saved-arrangements', serializeArrangements(next));
@@ -88,12 +90,22 @@ class Indicator extends PanelMenu.Button {
         }
     }
 
-    _saveCurrentArrangement(name) {
+    async _saveCurrentArrangement(name) {
         try {
-            const next = saveArrangement(this._savedArrangements(), name, this._collectScreens());
+            const screens = await collectCurrentScreens();
+            const next = saveArrangement(this._savedArrangements(), name, screens);
             this._settings.set_string('saved-arrangements', serializeArrangements(next));
         } catch (error) {
-            _debug(`failed to save arrangement: ${error.message}`);
+            notifyError(_('Could not save arrangement'), error.message);
+        }
+    }
+
+    async _applyArrangement(arrangement) {
+        try {
+            await applyArrangement(arrangement);
+            _debug(`applied arrangement '${arrangement.name}'`);
+        } catch (error) {
+            notifyError(_('Could not apply arrangement'), `${arrangement.name}: ${error.message}`);
         }
     }
 
