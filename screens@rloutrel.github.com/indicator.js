@@ -67,7 +67,7 @@ class Indicator extends PanelMenu.Button {
         this._buildSavedArrangements();
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
         this.menu.addAction(_('Save current arrangement…'), () => {
-            openSaveArrangementDialog(name => this._saveCurrentArrangement(name));
+            openSaveArrangementDialog(name => this._saveArrangementWithCurrent(name));
         });
         this.menu.addAction(_('Display Settings…'), () => {
             Gio.Subprocess.new(['gnome-control-center', 'display'],
@@ -88,6 +88,7 @@ class Indicator extends PanelMenu.Button {
         for (const arrangement of this._savedArrangements()) {
             const item = new PopupMenu.PopupSubMenuMenuItem(arrangement.name);
             item.menu.addAction(_('Set'), () => this._applyArrangement(arrangement));
+            item.menu.addAction(_('Update with current'), () => this._saveArrangementWithCurrent(arrangement.name));
             item.menu.addAction(_('Set for login screen'), () => this._setForLoginScreen(arrangement));
             item.menu.addAction(_('Delete'), () => {
                 const next = removeArrangement(this._savedArrangements(), arrangement.name);
@@ -97,13 +98,14 @@ class Indicator extends PanelMenu.Button {
         }
     }
 
-    async _saveCurrentArrangement(name) {
+    // Save (or overwrite, same name) an arrangement from the current screens.
+    async _saveArrangementWithCurrent(name) {
         try {
             const screens = await collectCurrentScreens();
             const next = saveArrangement(this._savedArrangements(), name, screens);
             this._settings.set_string('saved-arrangements', serializeArrangements(next));
         } catch (error) {
-            notifyError(_('Could not save arrangement'), error.message);
+            notifyError(_('Could not save arrangement'), `${name}: ${error.message}`);
         }
     }
 
