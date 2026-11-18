@@ -10,8 +10,8 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 import {_debug, notifyError} from './logger.js';
 import {toScreenDescriptors, formatScreenLabel} from './screens.js';
-import {parseArrangements, saveArrangement, removeArrangement, serializeArrangements} from './arrangements.js';
-import {collectCurrentScreens, applyArrangement} from './displayConfig.js';
+import {parseArrangements, saveArrangement, removeArrangement, serializeArrangements, toMonitorsXml} from './arrangements.js';
+import {collectCurrentScreens, applyArrangement, writeLoginScreenMonitorsXml} from './displayConfig.js';
 import {openSaveArrangementDialog} from './arrangementDialog.js';
 
 export const Indicator = GObject.registerClass(
@@ -82,6 +82,7 @@ class Indicator extends PanelMenu.Button {
         for (const arrangement of this._savedArrangements()) {
             const item = new PopupMenu.PopupSubMenuMenuItem(arrangement.name);
             item.menu.addAction(_('Set'), () => this._applyArrangement(arrangement));
+            item.menu.addAction(_('Set for login screen'), () => this._setForLoginScreen(arrangement));
             item.menu.addAction(_('Delete'), () => {
                 const next = removeArrangement(this._savedArrangements(), arrangement.name);
                 this._settings.set_string('saved-arrangements', serializeArrangements(next));
@@ -106,6 +107,16 @@ class Indicator extends PanelMenu.Button {
             _debug(`applied arrangement '${arrangement.name}'`);
         } catch (error) {
             notifyError(_('Could not apply arrangement'), `${arrangement.name}: ${error.message}`);
+        }
+    }
+
+    async _setForLoginScreen(arrangement) {
+        try {
+            const xml = toMonitorsXml(arrangement);
+            await writeLoginScreenMonitorsXml(xml);
+            _debug(`arrangement '${arrangement.name}' written to the login screen monitors.xml`);
+        } catch (error) {
+            notifyError(_('Could not set the login screen configuration'), `${arrangement.name}: ${error.message}`);
         }
     }
 
