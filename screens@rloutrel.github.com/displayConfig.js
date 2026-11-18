@@ -108,7 +108,7 @@ export async function applyArrangement(arrangement) {
         `[(${quote(connector)}, ${quote(modeId)}, {})])`).join(', ')}]`;
     const text = `(${serial}, 1, ${logicalMonitorsText}, {})`;
     const params = GLib.Variant.parse(
-        GLib.VariantType.new('(uua(iiduba(ssa{sv}))a{sv})'), text);
+        GLib.VariantType.new('(uua(iiduba(ssa{sv}))a{sv})'), text, -1, null);
     if (params === null)
         throw new Error(`failed to build ApplyMonitorsConfig parameters: ${text}`);
     await call('ApplyMonitorsConfig', params);
