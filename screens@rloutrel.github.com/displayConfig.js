@@ -76,32 +76,33 @@ function currentMode(monitor) {
 // Saved screens whose connector is not currently connected are skipped.
 export async function applyArrangement(arrangement) {
     const {serial, monitors} = await getCurrentState();
-    const logicalMonitors = [];
+    const entries = [];
     for (const screen of arrangement.screens) {
         const connector = screen.spec?.connector ?? screen.connector;
         const monitor = monitors.find(m => m[0][0] === connector);
-        if (!monitor)
-            continue;
-        logicalMonitors.push([
-            screen.x,
-            screen.y,
-            screen.scale ?? 1.0,
-            0, // transform: normal
-            screen.isPrimary === true,
-            [[connector, currentMode(monitor)[0], {}]],
-        ]);
+        if (monitor)
+            entries.push({screen, connector, modeId: currentMode(monitor)[0]});
     }
-    if (logicalMonitors.length === 0)
+    if (entries.length === 0)
         throw new Error('none of the saved screens is currently connected');
-    if (!logicalMonitors.some(lm => lm[4]))
-        logicalMonitors[0][4] = true; // mutter requires exactly one primary
-    // Build the variant explicitly with the exact D-Bus signature: letting
-    // GJS guess the JS -> variant conversion for the nested structs fails
-    // with "not a subclass of GObject.Struct".
-    // Signature: (u serial, u method, a(iiduba(ssa{sv})) logical_monitors,
-    // a{sv} properties).
+    if (!entries.some(e => e.screen.isPrimary === true))
+        entries[0] = {...entries[0], screen: {...entries[0].screen, isPrimary: true}};
+
+    // GJS will not coerce nested JS arrays into D-Bus structs ("not a
+    // subclass of GObject.Struct, it's a Array"), so build the structs
+    // bottom-up as explicit GLib.Variant objects:
+    // logical monitor = (i x, i y, d scale, u transform, b primary,
+    //                     a(ssa{sv}) monitors)
+    // monitor entry   = (s connector, s mode_id, a{sv} properties)
+    const logicalVariants = entries.map(({screen, connector, modeId}) => {
+        const monitorEntry = new GLib.Variant('(ssa{sv})',
+            [connector, modeId, new GLib.Variant('a{sv}', {})]);
+        return new GLib.Variant('(iiduba(ssa{sv}))',
+            [screen.x, screen.y, screen.scale ?? 1.0, 0, screen.isPrimary === true,
+                [monitorEntry]]);
+    });
     const params = new GLib.Variant('(uua(iiduba(ssa{sv}))a{sv})',
-        [serial, 1, logicalMonitors, {}]);
+        [serial, 1, logicalVariants, new GLib.Variant('a{sv}', {})]);
     await call('ApplyMonitorsConfig', params);
 }
 
