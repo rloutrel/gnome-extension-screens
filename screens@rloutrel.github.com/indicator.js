@@ -2,7 +2,6 @@
 // Pure logic lives in pure modules (see AGENTS.md); this file only wires
 // GJS widgets and keeps the enable()/disable() lifecycle clean.
 import St from 'gi://St';
-import GLib from 'gi://GLib';
 import Gio from 'gi://Gio';
 import GObject from 'gi://GObject';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
@@ -21,7 +20,7 @@ class Indicator extends PanelMenu.Button {
         this._extensionPath = extensionPath;
         this._openPreferences = openPreferences;
         this._settings = settings;
-        this._pollTimeoutId = null;
+        this._monitorsChangedId = null;
         this._settingsChangedId = null;
     }
 
@@ -30,7 +29,9 @@ class Indicator extends PanelMenu.Button {
         this._buildMenu();
         this._settingsChangedId = this._settings.connect('changed',
             () => this._rebuildMenuIfClosed());
-        this._startPolling();
+        const monitorManager = global.backend.get_monitor_manager();
+        this._monitorsChangedId = monitorManager.connect('monitors-changed',
+            () => this._rebuildMenuIfClosed());
     }
 
     _addIcon() {
@@ -127,25 +128,12 @@ class Indicator extends PanelMenu.Button {
             this._buildMenu();
     }
 
-    _startPolling() {
-        this._stopPolling();
-        this._pollTimeoutId = GLib.timeout_add_seconds(
-            GLib.PRIORITY_DEFAULT, 5, () => {
-                this._rebuildMenuIfClosed();
-                return GLib.SOURCE_CONTINUE;
-            });
-    }
-
-    _stopPolling() {
-        if (this._pollTimeoutId) {
-            GLib.source_remove(this._pollTimeoutId);
-            this._pollTimeoutId = null;
-        }
-    }
-
     destroy() {
         _debug('indicator destroy()');
-        this._stopPolling();
+        if (this._monitorsChangedId) {
+            global.backend.get_monitor_manager().disconnect(this._monitorsChangedId);
+            this._monitorsChangedId = null;
+        }
         if (this._settingsChangedId) {
             this._settings.disconnect(this._settingsChangedId);
             this._settingsChangedId = null;
