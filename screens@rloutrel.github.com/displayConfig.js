@@ -120,6 +120,25 @@ export async function applyArrangement(arrangement) {
     if (!entries.some(e => e.screen.isPrimary === true))
         entries[0] = {...entries[0], screen: {...entries[0].screen, isPrimary: true}};
 
+    // Group screens sharing the same position into ONE logical monitor with
+    // several monitor entries — that is what a mirror/clone arrangement is.
+    // Emitting one logical monitor per screen at identical coordinates is
+    // an invalid layout and can crash the compositor.
+    const groups = new Map();
+    for (const entry of entries) {
+        const key = `${entry.screen.x},${entry.screen.y}`;
+        if (!groups.has(key))
+            groups.set(key, {x: entry.screen.x, y: entry.screen.y, entries: []});
+        groups.get(key).entries.push(entry);
+    }
+    const logicalMonitors = [...groups.values()].map(group => ({
+        x: group.x,
+        y: group.y,
+        scale: group.entries[0].screen.scale ?? 1.0,
+        primary: group.entries.some(e => e.screen.isPrimary === true),
+        monitors: group.entries.map(e => [e.connector, e.modeId]),
+    }));
+
     // GJS cannot reliably coerce nested JS arrays into D-Bus structs ("not
     // a subclass of GObject_Struct"), so build the parameters with
     // GLib.Variant.parse() from the GVariant text format instead — the same
@@ -127,17 +146,24 @@ export async function applyArrangement(arrangement) {
     // logical monitor = (i x, i y, d scale, u transform, b primary,
     //                     a(ssa{sv}) monitors)
     // monitor entry   = (s connector, s mode_id, a{sv} properties)
-    const logicalMonitorsText = `[${entries.map(({screen, connector, modeId}) =>
-        `(${screen.x}, ${screen.y}, ${screen.scale ?? 1.0}, 0, ${screen.isPrimary === true}, ` +
-        `[(${quote(connector)}, ${quote(modeId)}, {})])`).join(', ')}]`;
-    const text = `(${serial}, 1, ${logicalMonitorsText}, {})`;
-    // g_variant_parse(type, text, limit, end, ...): limit and end are
-    // nullable gchar pointers, not sizes — pass null for both.
-    const params = GLib.Variant.parse(
-        GLib.VariantType.new('(uua(iiduba(ssa{sv}))a{sv})'), text, null, null);
-    if (params === null)
-        throw new Error(`failed to build ApplyMonitorsConfig parameters: ${text}`);
-    await call('ApplyMonitorsConfig', params);
+    const logicalMonitorsText = `[${logicalMonitors.map(lm =>
+        `(${lm.x}, ${lm.y}, ${lm.scale}, 0, ${lm.primary}, ` +
+        `[${lm.monitors.map(([connector, modeId]) => `(${quote(connector)}, ${quote(modeId)}, {})`).join(', ')}])`).join(', ')}]`;
+    const buildParams = method => {
+        const text = `(${serial}, ${method}, ${logicalMonitorsText}, {})`;
+        // g_variant_parse(type, text, limit, end, ...): limit and end are
+        // nullable gchar pointers, not sizes — pass null for both.
+        const params = GLib.Variant.parse(
+            GLib.VariantType.new('(uua(iiduba(ssa{sv}))a{sv})'), text, null, null);
+        if (params === null)
+            throw new Error(`failed to build ApplyMonitorsConfig parameters: ${text}`);
+        return params;
+    };
+    // Verify first (method 0): a rejected config must not be applied, and
+    // applying an invalid one can take down the session. Only then apply
+    // for this session (method 1, temporary).
+    await call('ApplyMonitorsConfig', buildParams(0));
+    await call('ApplyMonitorsConfig', buildParams(1));
 }
 
 function quote(value) {
