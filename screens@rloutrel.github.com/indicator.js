@@ -9,8 +9,8 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 import {_debug, notifyError} from './logger.js';
 import {toScreenDescriptors, formatScreenLabel} from './screens.js';
-import {parseArrangements, saveArrangement, removeArrangement, serializeArrangements, toMonitorsXml} from './arrangements.js';
-import {collectCurrentScreens, applyArrangement, writeLoginScreenMonitorsXml} from './displayConfig.js';
+import {parseArrangements, saveArrangement, removeArrangement, serializeArrangements, mirrorMonitorsXml} from './arrangements.js';
+import {collectCurrentScreens, collectAllMonitors, applyArrangement, writeLoginScreenMonitorsXml} from './displayConfig.js';
 import {openSaveArrangementDialog} from './arrangementDialog.js';
 
 export const Indicator = GObject.registerClass(
@@ -69,6 +69,7 @@ class Indicator extends PanelMenu.Button {
         this.menu.addAction(_('Save current arrangement…'), () => {
             openSaveArrangementDialog(name => this._saveArrangementWithCurrent(name));
         });
+        this.menu.addAction(_('Set login screen to mirror'), () => this._setLoginScreenMirror());
         this.menu.addAction(_('Display Settings…'), () => {
             Gio.Subprocess.new(['gnome-control-center', 'display'],
                 Gio.SubprocessFlags.NONE);
@@ -89,7 +90,6 @@ class Indicator extends PanelMenu.Button {
             const item = new PopupMenu.PopupSubMenuMenuItem(arrangement.name);
             item.menu.addAction(_('Apply'), () => this._applyArrangement(arrangement));
             item.menu.addAction(_('Update with current'), () => this._saveArrangementWithCurrent(arrangement.name));
-            item.menu.addAction(_('Set for login screen'), () => this._setForLoginScreen(arrangement));
             item.menu.addAction(_('Delete'), () => {
                 const next = removeArrangement(this._savedArrangements(), arrangement.name);
                 this._settings.set_string('saved-arrangements', serializeArrangements(next));
@@ -118,13 +118,17 @@ class Indicator extends PanelMenu.Button {
         }
     }
 
-    async _setForLoginScreen(arrangement) {
+    // Write a mirror-everything configuration (all connected screens in one
+    // logical monitor) to GDM's monitors.xml, so the login screen mirrors
+    // whatever display set is present.
+    async _setLoginScreenMirror() {
         try {
-            const xml = toMonitorsXml(arrangement);
+            const monitors = await collectAllMonitors();
+            const xml = mirrorMonitorsXml(monitors);
             await writeLoginScreenMonitorsXml(xml);
-            _debug(`arrangement '${arrangement.name}' written to the login screen monitors.xml`);
+            _debug('login screen set to mirror all connected screens');
         } catch (error) {
-            notifyError(_('Could not set the login screen configuration'), `${arrangement.name}: ${error.message}`);
+            notifyError(_('Could not set the login screen to mirror'), error.message);
         }
     }
 

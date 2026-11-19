@@ -106,6 +106,30 @@ function formatScale(scale) {
     return String(scale ?? 1);
 }
 
+function specXml(spec) {
+    return `        <monitorspec>
+          <connector>${escapeXml(spec.connector)}</connector>
+          <vendor>${escapeXml(spec.vendor)}</vendor>
+          <product>${escapeXml(spec.product)}</product>
+          <serial>${escapeXml(spec.serial)}</serial>
+        </monitorspec>`;
+}
+
+function modeXml(mode) {
+    return `        <mode>
+          <width>${mode.width}</width>
+          <height>${mode.height}</height>
+          <rate>${mode.rate.toFixed(3)}</rate>
+        </mode>`;
+}
+
+function monitorXml(m) {
+    return `      <monitor>
+${specXml(m.spec)}
+${modeXml(m.mode)}
+      </monitor>`;
+}
+
 // Render an arrangement as a GDM-compatible monitors.xml (version 2).
 // Screens without a full spec/mode (e.g. saved by an older version) are
 // skipped; throws if nothing displayable remains.
@@ -118,23 +142,32 @@ export function toMonitorsXml(arrangement) {
       <y>${s.y}</y>
       <scale>${formatScale(s.scale)}</scale>
       <primary>${s.isPrimary ? 'yes' : 'no'}</primary>
-      <monitor>
-        <monitorspec>
-          <connector>${escapeXml(s.spec.connector)}</connector>
-          <vendor>${escapeXml(s.spec.vendor)}</vendor>
-          <product>${escapeXml(s.spec.product)}</product>
-          <serial>${escapeXml(s.spec.serial)}</serial>
-        </monitorspec>
-        <mode>
-          <width>${s.mode.width}</width>
-          <height>${s.mode.height}</height>
-          <rate>${s.mode.rate.toFixed(3)}</rate>
-        </mode>
-      </monitor>
+${monitorXml(s)}
     </logicalmonitor>`);
     return `<monitors version="2">
   <configuration>
 ${logicalMonitors.join('\n')}
+  </configuration>
+</monitors>
+`;
+}
+
+// Render a mirror configuration for the login screen: a single logical
+// monitor at (0,0) containing every given screen. `monitors` entries are
+// {spec, mode} for all connected displays.
+export function mirrorMonitorsXml(monitors) {
+    const valid = monitors.filter(m => m.spec && m.mode);
+    if (valid.length === 0)
+        throw new Error('no connected screen with full spec/mode');
+    return `<monitors version="2">
+  <configuration>
+    <logicalmonitor>
+      <x>0</x>
+      <y>0</y>
+      <scale>1</scale>
+      <primary>yes</primary>
+${valid.map(monitorXml).join('\n')}
+    </logicalmonitor>
   </configuration>
 </monitors>
 `;

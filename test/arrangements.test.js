@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import {strict as assert} from 'node:assert';
 
-import {parseArrangements, saveArrangement, removeArrangement, serializeArrangements, toMonitorsXml} from '../screens@rloutrel.github.com/arrangements.js';
+import {parseArrangements, saveArrangement, removeArrangement, serializeArrangements, toMonitorsXml, mirrorMonitorsXml} from '../screens@rloutrel.github.com/arrangements.js';
 
 const SCREEN = {index: 0, isPrimary: true, x: 0, y: 0, width: 1920, height: 1080};
 
@@ -93,4 +93,21 @@ test('toMonitorsXml escapes XML special characters and skips spec-less screens',
     assert.match(xml, /<product>&lt;X&gt;<\/product>/);
     assert.equal(xml.match(/<logicalmonitor>/g).length, 1); // spec-less screen skipped
     assert.throws(() => toMonitorsXml({name: 'Old', screens: [SCREEN]}));
+});
+
+test('mirrorMonitorsXml puts every screen in a single primary logical monitor', () => {
+    const monitors = [
+        {spec: {connector: 'eDP-1', vendor: 'AUO', product: 'Panel', serial: '0x0'}, mode: {width: 1920, height: 1080, rate: 60}},
+        {spec: {connector: 'DP-1', vendor: 'DEL', product: 'U2419H', serial: 'ABC'}, mode: {width: 1920, height: 1080, rate: 59.95}},
+        {spec: {connector: 'HDMI-1', vendor: 'X', product: 'Y', serial: ''}}, // no mode: skipped
+    ];
+    const xml = mirrorMonitorsXml(monitors);
+    assert.match(xml, /^<monitors version="2">/);
+    assert.equal(xml.match(/<logicalmonitor>/g).length, 1);
+    assert.equal(xml.match(/<monitor>/g).length, 2);
+    assert.match(xml, /<x>0<\/x>\n      <y>0<\/y>\n      <scale>1<\/scale>\n      <primary>yes<\/primary>/);
+    assert.match(xml, /<connector>eDP-1<\/connector>/);
+    assert.match(xml, /<connector>DP-1<\/connector>/);
+    assert.ok(!xml.includes('HDMI-1'));
+    assert.throws(() => mirrorMonitorsXml([]));
 });

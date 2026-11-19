@@ -73,6 +73,30 @@ export async function collectCurrentScreens() {
     });
 }
 
+// All connected physical monitors (including inactive ones) as
+// {spec, mode} plain objects, for building a mirror-everything config.
+export async function collectAllMonitors() {
+    const {monitors} = await getCurrentState();
+    return monitors.map(m => {
+        const mode = currentMode(m);
+        return {
+            spec: {
+                connector: String(m[0][0]),
+                vendor: String(m[0][1]),
+                product: String(m[0][2]),
+                serial: String(m[0][3]),
+            },
+            mode: mode
+                ? {
+                    width: Math.round(mode[1]),
+                    height: Math.round(mode[2]),
+                    rate: mode[3] > 0 ? mode[3] : 60,
+                }
+                : undefined,
+        };
+    });
+}
+
 function currentMode(monitor) {
     const modes = monitor[1];
     return modes.find(m => m[5]['is-current'] === true) ??

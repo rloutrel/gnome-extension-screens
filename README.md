@@ -10,8 +10,10 @@ top bar. It targets **GNOME Shell 50/51** (ESM imports
   `global.display`) and lets you save the current arrangement under a name
   (stored in the `saved-arrangements` GSettings key); each saved arrangement
   has an **Apply** action (applies it via `org.gnome.Mutter.DisplayConfig`, temporary method, so native per-monitor-set configs in monitors.xml are preserved),
-  a **Set for login screen** action (writes GDM's `monitors.xml` through
-  `pkexec`, which prompts for the admin password) and a **Delete** action.
+  an **Update with current** action and a **Delete** action. A top-level
+  **Set login screen to mirror** action writes a mirror-everything
+  configuration (all connected screens) to GDM's `monitors.xml` through
+  `pkexec`, which prompts for the admin password.
 - **GNOME Shell 50/51 skeleton** — ESM imports, `extension.js` lifecycle
   only, `indicator.js` (PanelMenu), `prefs.js` (GTK4/Adwaita), GSettings
   schema, theme-aware `stylesheet.css`, `logger.js`.

@@ -11,7 +11,7 @@ export function openSaveArrangementDialog(onSave) {
     });
 
     const entry = new St.Entry({
-        hint_text: _('Configuration name'),
+        hint_text: _('Arrangement name'),
         can_focus: true,
     });
     dialog.contentLayout.add_child(entry);
